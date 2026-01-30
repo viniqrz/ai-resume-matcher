@@ -15,12 +15,25 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MatchResult | null>(null);
 
+  const isDescriptionValid = jobDescription.trim().length >= 200;
+  const isResumeAttached = !!resumeFile;
   const canSubmit = !isLoading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!canSubmit) return;
+
+    // Trigger explicit validation
+    if (!isResumeAttached) {
+      setError('Please upload your resume PDF first.');
+      return;
+    }
+
+    if (!isDescriptionValid) {
+      setError(`Job description must be at least 200 characters. Currently ${jobDescription.length}/200.`);
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
@@ -73,7 +86,7 @@ export default function Home() {
             <span className="text-sm text-cyan-400 font-medium">AI-Powered Analysis</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Resume Parser & <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">Matcher</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">Resume</span> Matcher
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Upload your resume and paste a job description to get instant AI-powered matching analysis with actionable feedback.

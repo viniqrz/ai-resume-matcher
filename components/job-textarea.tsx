@@ -8,7 +8,7 @@ interface JobTextareaProps {
 
 export function JobTextarea({ value, onChange, disabled }: JobTextareaProps) {
   const charCount = value.length;
-  const minChars = 50;
+  const minChars = 200;
   const isValid = charCount >= minChars;
 
   return (

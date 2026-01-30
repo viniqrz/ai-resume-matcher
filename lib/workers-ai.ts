@@ -21,7 +21,7 @@ export async function analyzeMatch(
   }
 
   const response = await fetch(
-    `${CLOUDFLARE_API}/${accountId}/ai/run/@cf/meta/llama-3-8b-instruct`,
+    `${CLOUDFLARE_API}/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
     {
       method: 'POST',
       headers: {
@@ -74,17 +74,14 @@ Respond with ONLY the JSON object, no additional text.`
     throw new Error('Invalid response from Cloudflare AI');
   }
 
-  // Parse the JSON response from the AI
   try {
-    // Remove any markdown code blocks if present
-    let jsonString = data.result.response
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim();
-    
+    const jsonMatch = data.result.response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in AI response');
+    }
+    const jsonString = jsonMatch[0];
     const result = JSON.parse(jsonString);
     
-    // Validate the response structure
     return {
       score: typeof result.score === 'number' ? Math.min(100, Math.max(0, result.score)) : 50,
       summary: result.summary || 'Analysis completed.',

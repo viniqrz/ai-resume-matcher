@@ -1,9 +1,36 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import { extractTextFromPDF } from '@/lib/pdf-parser';
 import { analyzeMatch, MatchResult } from '@/lib/ai-service';
+import { isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Basic Rate Limiting: 5 requests per hour per IP
+    const headerPayload = await headers();
+    const ip = headerPayload.get('x-forwarded-for') || 'anonymous';
+    const limit = 5;
+    const windowMs = 60 * 60 * 1000; // 1 hour
+
+    const { limited, remaining, reset } = isRateLimited(ip, limit, windowMs);
+
+    if (limited) {
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded. Please try again in an hour.',
+          retryAfter: Math.ceil((reset - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': reset.toString(),
+            'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString()
+          }
+        }
+      );
+    }
     const formData = await request.formData();
     
     const resumeFile = formData.get('resume') as File | null;

@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Parser & Matcher | AI-Powered Job Matching",
+  title: "Resume Matcher | AI-Powered Job Matching",
   description: "Upload your resume and get instant AI-powered matching analysis against any job description. Free, private, and actionable feedback.",
   keywords: ["resume", "job matching", "AI", "career", "job search"],
   openGraph: {

@@ -19,9 +19,13 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<ParsedPDF> {
           const texts = page.Texts || [];
           texts.forEach((textItem) => {
             if (textItem.R && textItem.R.length > 0) {
-              const text = textItem.R.map((r: { T: string }) => 
-                decodeURIComponent(r.T)
-              ).join('');
+              const text = textItem.R.map((r: { T: string }) => {
+                try {
+                  return decodeURIComponent(r.T);
+                } catch {
+                  return r.T; // Fallback to raw text if decoding fails
+                }
+              }).join('');
               fullText += text + ' ';
             }
           });
